@@ -131,10 +131,15 @@ class CargoProjectsServiceImpl(
     override val hasAtLeastOneValidProject: Boolean
         get() = hasAtLeastOneValidProject(allProjects)
 
-    override fun findProjectForFile(file: VirtualFile): CargoProject? =
-        directoryIndex.getInfoForFile(file).takeIf { it !== noProjectMarker }
+    override fun findProjectForFile(file: VirtualFile): CargoProject? {
+        val canonicalFile = file.canonicalFile ?: return null
+        return directoryIndex.getInfoForFile(canonicalFile).takeIf { it !== noProjectMarker }
+    }
 
-    override fun findPackageForFile(file: VirtualFile): CargoWorkspace.Package? = packageIndex.findPackageForFile(file)
+    override fun findPackageForFile(file: VirtualFile): CargoWorkspace.Package? {
+        val canonicalFile = file.canonicalFile ?: return null
+        return packageIndex.findPackageForFile(canonicalFile)
+    }
 
     override fun attachCargoProject(manifest: Path): Boolean {
         if (isExistingProject(allProjects, manifest)) return false
